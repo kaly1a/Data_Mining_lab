@@ -1,0 +1,164 @@
+/*
+1. Write a menu-driven program to demonstrate the concept of forward selection method in
+feature selection and also apply min-max normalization for the filtered data for data
+Transformation for the given data set.
+The Given data Set:
+Absenteeism at work (UCI Repository)
+Link: https://archive.ics.uci.edu/ml/datasets/Absenteeism+at+work
+
+*/
+
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score as acc
+from mlxtend.feature_selection import SequentialFeatureSelector as sfs
+from mlxtend.feature_selection import ExhaustiveFeatureSelector as EFS
+df = pd.read_csv("Absenteeism_at_work.csv",sep=';')
+X_train, X_test, y_train, y_test = train_test_split(
+    df.values[:,:-1],
+    df.values[:,-1:],
+    test_size=0.25,
+    random_state=42)
+ 
+y_train = y_train.ravel()
+y_test = y_test.ravel()
+print('Training dataset shape:', X_train.shape, y_train.shape)
+print('Testing dataset shape:', X_test.shape, y_test.shape)
+
+clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+knn = KNeighborsClassifier(n_neighbors=3)
+print("1.Forward Selection")
+print("2.Backward Selection")
+print("3.Combined Selection")
+choice = int(input("Enter the choice"))
+ 
+# Build step forward feature selection
+if(choice == 1):
+  sfs1 = sfs(clf,
+           k_features=4,
+           forward=True,
+           floating=False,
+           verbose=2,
+           scoring='accuracy',
+           cv=5)
+ # Perform SFFS
+  sfs1 = sfs1.fit(X_train, y_train)
+ 
+  feat_cols = list(sfs1.k_feature_idx_)
+  print("****************")
+  print("The selected feature list:")
+  print(feat_cols)
+
+#performing min-max normalization
+import pandas as pd
+from sklearn import preprocessing
+def minMaxNor(num,list):
+    minNum=int(input("Enter Minimun Setting:\t"))
+    maxNum = int(input("Enter Maximum Setting:\t"))
+    ans=round(((num-min(list))/(max(list)-min(list))*(maxNum-minNum))+minNum,2)
+    return ans
+df = pd.read_csv("Absenteeism_at_work.csv",sep=';')
+data = df['Transportation expense']
+data = data[:10] #taking only first 10 data items
+data=np.sort(data)
+print(data)
+ 
+num=int(input("Enter an item from data : \t"))
+if num in data:
+  print("Calculating  min-max normalization")
+  print("After doing min-max normalization :",minMaxNor(num,data))
+else:
+  print("Item entered is not present!!")
+  print("Can't perform normalization on the selected item!")
+
+/*
+a) Write a python script to check whether any missing values are available in the given data
+set. If Yes, Identify those missing information and remove all missing information from the
+data set and store it as a separate CSV file as
+” newfile.csv”.
+*/
+ 
+#counting the missing values
+import pandas as pd
+import numpy as np
+ 
+df = pd.read_csv("Absenteeism_at_work.csv")
+ 
+naCount = df.isnull().sum().sum()
+print("Count of missing data: ", naCount)
+ 
+ 
+if naCount > 0:
+  modData = data.dropna(self, axis=1, how='any', thresh=None, subset=None, inplace=False)
+  modData.to_csv('newfile.csv')
+
+/*
+b) From “newfile.csv”, Use forward selection to extract the best
+features into a file called “newfile2.xls” and perform all columns or few columns of filtered
+data and apply min-max normalization and give a justifiable interpretation for the output.
+*/
+
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score as acc
+from mlxtend.feature_selection import SequentialFeatureSelector as sfs
+from mlxtend.feature_selection import ExhaustiveFeatureSelector as EFS
+ 
+df = pd.read_csv("Absenteeism_at_work.csv",sep=';')
+ 
+for fn in uploaded.keys():
+  print('User uploaded file "{name}" with length {length} bytes'.format(
+      name=fn, length=len(uploaded[fn])))
+X_train, X_test, y_train, y_test = train_test_split(
+    df.values[:,:-1],
+    df.values[:,-1:],
+    test_size=0.25,
+    random_state=42)
+ 
+y_train = y_train.ravel()
+y_test = y_test.ravel()
+print('Training dataset shape:', X_train.shape, y_train.shape)
+print('Testing dataset shape:', X_test.shape, y_test.shape)
+ 
+clf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+knn = KNeighborsClassifier(n_neighbors=3)
+ 
+def forward_selection():
+  sfs1 = sfs(clf,
+           k_features=5,
+           forward=True,
+           floating=False,
+           verbose=2,
+           scoring='accuracy',
+           cv=5)
+  # Perform SFFS
+  sfs1 = sfs1.fit(X_train, y_train)
+ 
+  feat_cols = list(sfs1.k_feature_idx_)
+  print("----------------")
+  print("The selected feature list:")
+  print(feat_cols)
+ 
+forward_selection()
+ 
+from sklearn import preprocessing
+def minMaxNor(num,list):
+  minNumber=int(input("Enter Minimun Setting:\t"))
+  maxNumber = int(input("Enter Maximum Setting:\t"))
+  ans=round(((num-min(list))/(max(list)-min(list))*(maxNumber-minNumber))+minNumber,2)
+  return ans
+data = feat_cols
+data=np.sort(data)
+print(data)
+ 
+num=int(input("Enter an item from the data: \t"))
+if num in data:
+  print("After doing min-max normalization: ",minMaxNor(num,data))
+else:
+  print("Item entered is not present in the data, cannot perform normalization.")
