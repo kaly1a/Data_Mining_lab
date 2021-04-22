@@ -1,0 +1,151 @@
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+df=pd.read_csv('Chronic_Kidney_Disease.csv')
+df
+
+df=df.drop(['Unnamed: 25'], axis = 1)
+df.head() 
+
+#checking for the missing values
+df=df.replace('?', np.nan)
+print(df.isnull().sum())
+print("________________________________")
+print("There exist missing values")
+
+#preprocessing data by replacing the null and '?' values 
+df['Age'] = pd.to_numeric(df['Age'])
+df['Age']=df['Age'].fillna(value=df['Age'].mean()) # if there are missing values. then execute this code
+df['Blood Pressure'] = pd.to_numeric(df['Blood Pressure'])
+df['Blood Pressure']=df['Blood Pressure'].fillna(value=df['Blood Pressure'].mean())
+
+df['Specific Gravity'] = pd.to_numeric(df['Specific Gravity'])
+df['Specific Gravity']=df['Specific Gravity'].fillna(value=df['Specific Gravity'].mean())
+
+df['Albumin'] = pd.to_numeric(df['Albumin'])
+df['Albumin']=df['Albumin'].fillna(value=df['Albumin'].mean())
+
+df['Sugar'] = pd.to_numeric(df['Sugar'])
+df['Sugar']=df['Sugar'].fillna(value=df['Sugar'].mean())
+
+df['Blood Glucose Random'] = pd.to_numeric(df['Blood Glucose Random'])
+df['Blood Glucose Random']=df['Blood Glucose Random'].fillna(value=df['Blood Glucose Random'].mean())
+
+df['Blood Urea'] = pd.to_numeric(df['Blood Urea'])
+df['Blood Urea']=df['Blood Urea'].fillna(value=df['Blood Urea'].mean())
+
+df['Serum Creatinine'] = pd.to_numeric(df['Serum Creatinine'])
+df['Serum Creatinine']=df['Serum Creatinine'].fillna(value=df['Serum Creatinine'].mean())
+
+df['Sodium'] = pd.to_numeric(df['Sodium'])
+df['Sodium']=df['Sodium'].fillna(value=df['Sodium'].mean())
+
+df['Potassium'] = pd.to_numeric(df['Potassium'])
+df['Potassium']=df['Potassium'].fillna(value=df['Potassium'].mean())
+
+df['Hemoglobin'] = pd.to_numeric(df['Hemoglobin'])
+df['Hemoglobin']=df['Hemoglobin'].fillna(value=df['Hemoglobin'].mean())
+
+df['Packed Cell Volume'] = pd.to_numeric(df['Packed Cell Volume'])
+df['Packed Cell Volume']=df['Packed Cell Volume'].fillna(value=df['Packed Cell Volume'].mean())
+
+df['White Blood Cell Count'] = pd.to_numeric(df['White Blood Cell Count'])
+df['White Blood Cell Count']=df['White Blood Cell Count'].fillna(value=df['White Blood Cell Count'].mean())
+
+df['Red Blood Cell Count'] = pd.to_numeric(df['Red Blood Cell Count'])
+df['Red Blood Cell Count']=df['Red Blood Cell Count'].fillna(value=df['Red Blood Cell Count'].mean())
+
+#--------------------------------------------------------------------------------------------------------------
+
+df['Red Blood Cells']=df['Red Blood Cells'].fillna(method='bfill')
+df['Pus Cell']=df['Pus Cell'].fillna(method='bfill')
+df['Bacteria']=df['Bacteria'].fillna(method='bfill')
+df['Pus Cell clumps']=df['Pus Cell clumps'].fillna(method='bfill')
+df['Hypertension']=df['Hypertension'].fillna(method='bfill')
+df['Diabetes Mellitus']=df['Diabetes Mellitus'].fillna(method='bfill')
+df['Coronary Artery Disease']=df['Coronary Artery Disease'].fillna(method='bfill')
+df['Appetite']=df['Appetite'].fillna(method='bfill')
+df['Pedal Edema']=df['Pedal Edema'].fillna(method='bfill')
+df['Anemia']=df['Anemia'].fillna(method='bfill')
+
+df['Class']=df['Class'].replace('no', 'ckd')
+
+print(df.isnull().sum())
+print("________________________________")
+print("Replaced all null and non - relevant values")
+
+# converting to numericals
+le1=LabelEncoder()
+df['Red Blood Cells'] = le1.fit_transform(df['Red Blood Cells'])
+df['Pus Cell'] = le1.fit_transform(df['Pus Cell'])
+df['Pus Cell clumps'] = le1.fit_transform(df['Pus Cell clumps'])
+df['Bacteria'] = le1.fit_transform(df['Bacteria'])
+df['Hypertension'] = le1.fit_transform(df['Hypertension'])
+df['Diabetes Mellitus'] = le1.fit_transform(df['Diabetes Mellitus'])
+df['Coronary Artery Disease'] = le1.fit_transform(df['Coronary Artery Disease'])
+df['Appetite'] = le1.fit_transform(df['Appetite'])
+df['Pedal Edema'] = le1.fit_transform(df['Pedal Edema'])
+df['Anemia'] = le1.fit_transform(df['Anemia'])
+df['Class'] = le1.fit_transform(df['Class'])
+df
+
+#statistical summary of the dataset
+df.describe()
+
+X=df.drop('Class',axis=1)
+y=df['Class']
+print(X)
+print(y)
+
+#Scenario1
+#Train test split (when dataset is divided into 80 percent training and 20 percent test)
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=100)
+print("Length of X_train : ", len(X_train))
+print("Length of X_test : ", len(X_test))
+model=GaussianNB()
+model.fit(X_train,y_train)
+y_pred_nb=model.predict(X_test)
+print(y_pred_nb)
+print("Accuracy : ",accuracy_score(y_test,y_pred_nb)*100)
+print("This is the accuracy achieved , when we compared test data with the model that we built(trained data)")
+from sklearn.metrics import classification_report, confusion_matrix
+mat=confusion_matrix(y_test,y_pred_nb)
+print(mat)
+sns.heatmap(mat,cmap='inferno')
+
+#Scenario2
+#Train test split (when dataset is divided into 70 percent training and 30 percent test)
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3, random_state=100)
+print("Length of X_train : ", len(X_train))
+print("Length of X_test : ", len(X_test))
+model=GaussianNB()
+model.fit(X_train,y_train)
+y_pred_nb=model.predict(X_test)
+print(y_pred_nb)
+print("Accuracy : ",accuracy_score(y_test,y_pred_nb)*100)
+print("This is the accuracy achieved , when we compared test data with the model that we built(trained data)")
+from sklearn.metrics import classification_report, confusion_matrix
+mat=confusion_matrix(y_test,y_pred_nb)
+print(mat)
+sns.heatmap(mat,cmap='icefire')
+
+#Scenario3
+#Train test split (when dataset is divided into 40 percent training and 60 percent test)
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.6, random_state=100)
+print("Length of X_train : ", len(X_train))
+print("Length of X_test : ", len(X_test))
+model=GaussianNB()
+model.fit(X_train,y_train)
+y_pred_nb=model.predict(X_test)
+print(y_pred_nb)
+print("Accuracy : ",accuracy_score(y_test,y_pred_nb)*100)
+print("This is the accuracy achieved , when we compared test data with the model that we built(trained data)")
+from sklearn.metrics import classification_report, confusion_matrix
+mat=confusion_matrix(y_test,y_pred_nb)
+print(mat)
+sns.heatmap(mat,cmap='crest')
