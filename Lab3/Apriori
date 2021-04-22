@@ -1,0 +1,45 @@
+/* Apriori Algorithm*/
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from apyori import apriori
+
+dataset=pd.read_csv("dermatology.csv")
+dataset.head()
+
+def function():
+  print("Class on which frequent mining should be done(1-6)")
+  val = int(input("Enter the class "))
+  datac = dataset.loc[dataset[34]==val]
+  data = datac.loc[datac[33]!='?']
+  row = len(data)
+  column = len(data.columns)
+  #print(row,"\n", column)
+
+  records = []
+  for i in range(0, row):
+    records.append([str(dataset.values[i,j]) for j in range(0,column)])
+
+  association_rules=apriori(records, min_support=0.0090,min_confidence=0.9, min_lift=3, min_length=3)
+  association_results = list(association_rules)
+
+  rules = (len(association_results))
+  print(rules)
+
+  for i in range(0,rules):
+    print('----------------------------------------------------')
+    print(association_results[i])
+  print("=====================================")
+
+  for item in association_results:
+    pair = item[0]
+    items = [x for x in pair]
+  print("Rule: " + items[0] + "-->" + items[1])
+
+  print("Support: " + str(item[1]))
+  print("Confidence: " + str(item[2][0][2]))
+  print("Lift: " + str(item[2][0][3]))
+  print("=====================================")
+  
+
+function()
