@@ -1,0 +1,25 @@
+/* FP Growth */
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import pyfpgrowth
+
+
+def FPGrowthAlgorithm():
+    print("     FP Growth Algorithm      ")
+    data = pd.read_csv('Online Retail.csv')
+    data = data.head(300)
+    data_op = data[['Description', 'Country']]
+#    print(data_op)
+    
+    dataArray = data_op.to_numpy()
+    final=[]
+    final = pyfpgrowth.find_frequent_patterns(dataArray, 2)
+    
+    result = list(final)
+    for i in range(0,10):
+        print(result[i])
+    
+    return   
+FPGrowthAlgorithm()
