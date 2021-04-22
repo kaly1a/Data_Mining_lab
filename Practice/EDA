@@ -1,0 +1,386 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+#sets the backend of matplotlib to the inline backend
+%matplotlib inline
+warnings.filterwarnings('ignore')
+import statsmodels.api as sm
+
+# Loading the data
+df = pd.read_csv("StudentsPerformance.csv", encoding= 'unicode_escape')
+print(df.shape)
+df.head(10)
+
+#print a concise summary of a DataFrame
+df.info()
+
+#prints the summary statistic of the numerical variables
+df.describe(include='all')
+
+#checking datatype for columns
+df.dtypes
+
+#variance
+df.var()
+
+#IQR for math score column
+from scipy.stats import iqr
+iqr(df['math score'])
+
+#Skewness for dataset
+print(df.skew())
+
+#getting independent values from dataset
+x = df.iloc[:, :-1].values
+print(x)
+
+#getting dependent values from dataset
+y = df.iloc[:,-1].values
+print(y)
+
+#checking for missing values
+df.isnull()
+
+#if we have to drop missing values
+df = df.dropna()    # Dropping the missing values.
+df.count()
+
+print(df.isnull().sum())   # After dropping the values
+
+#detecting outliers for math score column
+sns.boxplot(x=df['math score'])
+
+#detecting outliers for reading score column
+sns.boxplot(x=df['reading score'])
+
+#detecting outliers for writing score column
+sns.boxplot(x=df['writing score'])
+
+#Transformation - Binning
+data = df['math score']
+data = data[:30] #taking only first 30 data items
+data=np.sort(data)
+print('Data:')
+print(data)
+print('')
+
+#create three different matrices having 10 rows and 3 columns
+b1=np.zeros((10,3)) 
+b2=np.zeros((10,3)) 
+b3=np.zeros((10,3)) 
+
+#binning by mean
+for i in range (0,30,3): 
+  k=int(i/3) 
+  mean=(data[i] + data[i+1] + data[i+2] )/3
+  for j in range(3): 
+    b1[k,j]=mean 
+print("----Binning by mean:---- \n",b1)
+print('')
+
+#binning by median
+for i in range (0,30,3): 
+  k=int(i/3) 
+  for j in range (3): 
+    b2[k,j]=data[i+1] 
+print("----Binning by median:---- \n",b2)
+print('')
+
+#binning by boundary
+for i in range (0,30,3): 
+  k=int(i/3) 
+  for j in range (3): 
+    if (data[i+j]-data[i]) < (data[i+2]-data[i+j]): 
+      b3[k,j]=data[i] 
+    else: 
+      b3[k,j]=data[i+2]   
+print("----Binning by boundary:----\n",b3)
+
+#Transformation - Normalization
+import statistics
+from sklearn import preprocessing
+
+#min-max normalization
+def minMaxNor(num,list):
+    minNum=int(input("Enter Minimun Setting:\t"))
+    maxNum = int(input("Enter Maximum Setting:\t"))
+    ans=round(((num-min(list))/(max(list)-min(list))*(maxNum-minNum))+minNum,2)
+    return ans
+#df = pd.read_csv("StudentsPerformance.csv")
+data = df['math score']
+data = data[:10] #taking only first 10 data items
+data=np.sort(data)
+print(data)
+
+#z-score normalization
+def zNor (num,mean,stdDv):
+    return round((num-mean)/stdDv,2)
+
+#modified z-score normalization
+def zNorMAD (num,mean,abMeanDiv):
+    return round((num-mean)/abMeanDiv,2)
+
+#decimal-scaling normalization
+def decNor(num,maxNum):
+    digit=len(str(maxNum))
+    div=pow(10,digit)
+    return num/div
+
+num=float(input("Enter an item from data : \t"))
+if num in data:
+  print("Calculating  min-max normalization")
+  print("After doing min-max normalization :",minMaxNor(num,data))
+  print("\nCalculating z-score normalization")
+  print("After doing z-score normalization : \t", zNor(num,statistics.mean(data),statistics.stdev(data)))
+  print("\nCalculating Modified z-score normalization")
+  df = pd.DataFrame(data)
+  print("After doing Modified z-score normalization : \t", zNorMAD(num,statistics.mean(data),df.mad()))
+  print("\nCalculating decimal scaling normalization")
+  print("After doing decimal scaling normalization : \t", decNor(num,max(data)))
+else:
+  print("Item entered is not present!!")
+  print("Can't perform normalization on the selected item!")
+
+#pie charts of various columns
+plt.figure(figsize=(25,15))
+
+#subplot(nrows, ncols, plot_number) 
+plt.subplot(231)
+plt.title("Gender",fontsize=30)
+df = pd.read_csv("StudentsPerformance.csv")
+df['gender'].value_counts().plot.pie(autopct="%.2f%%",fontsize=15)
+
+plt.subplot(232)
+plt.title("Ethnicity",fontsize=30)
+df['race/ethnicity'].value_counts().plot.pie(startangle=90,autopct="%.2f%%",fontsize=15)
+
+plt.subplot(233)
+plt.title("Parental Level Of Education",fontsize=30)
+df['parental level of education'].value_counts().plot.pie(startangle=90,autopct="%.2f%%",fontsize=15)
+
+plt.subplot(234)
+plt.title("Lunch",fontsize=30)
+df['lunch'].value_counts().plot.pie(autopct="%.2f",fontsize=15)
+
+plt.subplot(235)
+plt.title("Test Preparation Course",fontsize=30)
+df['test preparation course'].value_counts().plot.pie(startangle=90,autopct="%.2f",fontsize=15)
+
+plt.show()
+
+#finding no. of students who got a particular score in each subject
+plt.figure(figsize=(20,10))
+sns.countplot(x='math score',data=df,palette="pastel")
+plt.xticks(fontsize=9)
+plt.show()
+
+plt.figure(figsize=(20,10))
+sns.countplot(x='reading score',data=df,palette="pastel")
+plt.xticks(fontsize=9)
+plt.show()
+
+plt.figure(figsize=(20,10))
+sns.countplot(x='writing score',data=df,palette="pastel")
+plt.xticks(fontsize=9)
+plt.show()
+
+#violin plot of various score
+plt.subplots_adjust(top=2,bottom=0,right=4,left=1,wspace=0.5,hspace=0)
+sns.set(font_scale=1.75)
+
+plt.subplot(1,3,1)
+sns.violinplot(y='math score',data=df)
+
+plt.subplot(1,3,2)
+sns.violinplot(y='reading score',data=df, color='g')
+
+plt.subplot(1,3,3)
+sns.violinplot(y='writing score',data=df,color='y')
+
+plt.show()
+
+#Comparison of scores with the other parameters
+#scores vs gender
+plt.figure(figsize=(12,8))
+plt.subplots_adjust(top=1,bottom=0,right=1,left=0,hspace=0.25,wspace=0.5)
+
+plt.subplot(131)
+plt.title("Math score v/s Gender")
+sns.barplot(x="gender",y='math score',data=df)
+
+plt.subplot(132)
+plt.title("Reading Score V/S Gender")
+sns.barplot(x='gender',y='reading score',data=df)
+
+plt.subplot(133)
+plt.title("Writing Score V/S Gender")
+sns.barplot(x='gender',y='writing score',data=df)
+
+plt.show()
+
+#scores vs ethnicity
+plt.figure(figsize=(15,15))
+plt.subplots_adjust(left=0.125,bottom=0.1, right=0.9,  top=0.9, wspace=0.35,hspace=0.5)
+#hspace is space b/w rows, wspace=space b/w columns
+
+plt.subplot(221)
+plt.title("Math Score v/s Ethnicity")
+sns.barplot(x='race/ethnicity',y='math score',data=df)
+plt.xticks(rotation=90)
+
+plt.subplot(222)
+plt.title("Reading Score v/s Ethnicity")
+sns.barplot(x='race/ethnicity',y='reading score',data=df)
+plt.xticks(rotation='vertical')
+
+plt.subplot(223)
+plt.title("Writing Score v/s Ethnicity")
+sns.barplot(y='race/ethnicity',x='writing score',data=df)
+
+plt.show()
+
+#scores vs preparation course
+plt.figure(figsize=(15,6))
+plt.subplots_adjust(wspace=0.5)
+
+plt.subplot(1,3,1)
+plt.title("Math score v/s Preparation course",fontsize=15)
+sns.barplot(x='test preparation course',y='math score',data=df)
+
+plt.xlabel("test preparation course",labelpad=10)
+#to increase space between axes and axes label
+
+plt.subplot(1,3,2)
+plt.title("Reading score v/s Preparation course",fontsize=15)
+sns.barplot(x='test preparation course',y='reading score',data=df)
+plt.xlabel("test preparation course",labelpad=10)
+
+plt.subplot(1,3,3)
+plt.title("Writing score v/s Preparation course",fontsize=15)
+g=sns.barplot(x='test preparation course',y='writing score',data=df)
+plt.xlabel("test preparation course",labelpad=10)
+
+plt.show()
+
+#scores vs parental education
+plt.figure(figsize=(15,15))
+plt.subplots_adjust(hspace=1,wspace=0.5)
+
+plt.subplot(2,2,1)
+plt.title("Math score v/s Parental level of education ")
+sns.barplot(x='parental level of education',y="math score",data=df)
+plt.xticks(rotation=90)
+
+plt.subplot(2,2,2)
+plt.title("Reading score v/s Parental level of education")
+sns.barplot(x='parental level of education',y="reading score",data=df)
+plt.xticks(rotation=90)
+
+plt.subplot(2,2,3)
+plt.title("Writing score v/s Parental level of education")
+sns.barplot(x='parental level of education',y="writing score",data=df)
+plt.xticks(rotation=90)
+
+plt.show()
+
+#scores vs lunch
+plt.figure(figsize=(18,10))
+plt.subplots_adjust(wspace=0.3)
+
+plt.subplot(1,3,1)
+plt.title("Math Score v/s Lunch")
+sns.barplot(x='lunch',y="math score",data=df)
+
+plt.subplot(1,3,2)
+plt.title("Reading Score v/s Lunch")
+sns.barplot(x='lunch',y="reading score",data=df)
+
+plt.subplot(1,3,3)
+plt.title("Writing Score v/s Lunch")
+sns.barplot(x='lunch',y="writing score",data=df)
+
+plt.show()
+
+#scores vs race/ethnicity
+plt.figure(figsize=(15,12))
+plt.subplots_adjust(wspace=0.25,hspace=0.8)
+
+plt.subplot(221)
+plt.title("Math score",fontsize=25)
+sns.barplot(x='race/ethnicity',y='math score',hue='test preparation course',data=df)
+plt.xticks(rotation=90)
+
+plt.subplot(222)
+plt.title("Reading score",fontsize=25)
+sns.barplot(x='race/ethnicity',y='reading score',hue='test preparation course',data=df)
+plt.xticks(rotation=90)
+
+plt.subplot(223)
+plt.title("Writing score",fontsize=25)
+sns.barplot(x='race/ethnicity',y='writing score',hue='test preparation course',data=df)
+plt.xticks(rotation=90)
+
+plt.show()
+
+#parental level of education vs race
+plt.figure(figsize=(10,25))
+plt.subplots_adjust(hspace=0.4)
+
+plt.subplot(311)
+plt.title("Math score",fontsize=10)
+sns.barplot(x='race/ethnicity',y='math score',hue='parental level of education',data=df)
+plt.xticks(rotation=90)
+plt.legend(loc='lower right')
+
+plt.subplot(312)
+plt.title("Reading score",fontsize=10)
+sns.barplot(x='race/ethnicity',y='reading score',hue='parental level of education',data=df)
+plt.xticks(rotation=90)
+plt.legend(loc='lower right')
+
+plt.subplot(313)
+plt.title("Writing score",fontsize=10)
+sns.barplot(x='race/ethnicity',y='writing score',hue='parental level of education',data=df)
+plt.xticks(rotation=90)
+plt.legend(loc='lower right')
+
+plt.show()
+
+#gender vs test preparation course
+plt.figure(figsize=(25,10))
+plt.subplots_adjust(wspace=0.25)
+
+plt.subplot(131)
+plt.title("Math Score")
+sns.barplot(x="gender",y="math score",hue='test preparation course',data=df)
+
+plt.subplot(132)
+plt.title("Reading Score")
+sns.barplot(x="gender",y="reading score",hue='test preparation course',data=df)
+
+plt.subplot(133)
+plt.title("Writing Score")
+sns.barplot(x="gender",y="writing score",hue='test preparation course',data=df)
+
+plt.show()
+
+#score vs race/ethnicity
+plt.figure(figsize=(20,12))
+plt.subplots_adjust(wspace=0.25,hspace=0.5)
+
+plt.subplot(221)
+plt.title("Math Score")
+sns.barplot(x="gender",y="math score",hue='race/ethnicity',data=df)
+
+plt.subplot(222)
+plt.title("Reading Score")
+sns.barplot(x="gender",y="reading score",hue='race/ethnicity',data=df)
+
+plt.subplot(223)
+plt.title("Writing Score")
+sns.barplot(x="gender",y="writing score",hue='race/ethnicity',data=df)
+
+plt.show()
+
